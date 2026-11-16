@@ -1,6 +1,5 @@
 *.java linguist-detectable=false
 *.py linguist-detectable=true
-teamCalculatorTest.java linguist-language=Python
-
+teamCalculatorTest.java linguist-vendored
 
 
