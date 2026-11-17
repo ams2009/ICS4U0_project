@@ -1,10 +1,14 @@
-# test to see if this works
-import math
+# Meet the Teacher Reservation System
+# Created by Aamna and Amelina
 
-def calculate():
-    x = 10
-    return x * 2
+time_slots = [
+    "5:00 pm",
+    "5:15 pm",
+    "5:30 pm",
+    "5:45 pm",
+    "6:00 pm"
+]
 
-print(calculate())
+reservations = []
 
-print("testing team project repository for Python")
+print("Meet the Teacher Reservation System")
