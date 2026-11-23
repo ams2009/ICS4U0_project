@@ -1,6 +1,8 @@
 from flask import Flask
 
 app = Flask(__name__)
+booked_times = []
+
 # homepage
 @app.route("/")
 def home():
@@ -9,6 +11,14 @@ def home():
 # booking page - amelina
 @app.route("/booking")
 def booking():
+    times = ["5:00 pm", "5:15 pm", "5:30 pm", "5:45 pm", "6:00 pm"]
+
+    time_options = ""
+
+    for time in times :
+        if time not in booked_times:
+            time_options += "<option>" + time + "</option>"
+    
     return """
     <h1>Reservation Booking</h1>
 
@@ -27,11 +37,7 @@ def booking():
     <select name="time" required>
         <option value= "" disabled
         selected>Select a time</option>
-        <option>5:00 pm</option>
-        <option>5:15 pm</option>
-        <option>5:30 pm</option>
-        <option>5:45 pm</option>
-        <option>6:00 pm</option>
+        """ + time_options + """ 
     </select>
 
     <br><br>
