@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center py-4">
+    <h1 class="display-5 mb-3">Parent-Teacher Conference Hub</h1>
+    <p class="lead mx-auto mb-5" style="color: #7D6B5D; max-width: 600px;">
+        Parents can view and book slots
+    </p>
+
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-4">
+            <div class="card h-100 p-4 text-start">
+                <div class="card-body d-flex flex-column justify-content-between p-0">
+                    <div>
+                        <h4>Shared Live Calendar</h4>
+                        <p class="small" style="color: #7D6B5D;">View available and reserved dates via calendar</p>
+                    </div>
+                    <a href="{{ url_for('shared_calendar') }}" class="btn btn-lavender w-100 mt-4">Open calendar view</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 p-4 text-start">
+                <div class="card-body d-flex flex-column justify-content-between p-0">
+                    <div>
+                        <h4>Parent Booking View</h4>
+                        <p class="small" style="color: #7D6B5D;">Check slots + make reservations</p>
+                    </div>
+                    <a href="{{ url_for('reserve') }}" class="btn btn-sage w-100 mt-4">View & Book Slots</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 p-4 text-start">
+                <div class="card-body d-flex flex-column justify-content-between p-0">
+                    <div>
+                        <h4>Teacher Portal</h4>
+                        <p class="small" style="color: #7D6B5D;">Sign in or create a teacher account to publish conference timings and view slots.</p>
+                    </div>
+                    <a href="{{ url_for('teacher_auth') }}" class="btn btn-outline-taupe w-100 mt-4">Teacher Login / Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

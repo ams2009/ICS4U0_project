@@ -1,0 +1,202 @@
+@import url('https://googleapis.com');
+
+:root {
+    --bg-cream: #FAF7F2;
+    --bg-card: #FFFFFF;
+    --beige-soft: #EFE8DF;
+    --beige-border: #E2D6C8;
+    --brown-dark: #4A3B32;
+    --brown-muted: #7D6B5D;
+    --lavender-main: #8E7DBE;
+    --lavender-hover: #7A68AE;
+    --lavender-soft: #F1EDFA;
+    --sage-open: #6B9080;
+    --rose-booked: #C97A7E;
+}
+
+body {
+    background-color: var(--bg-cream);
+    color: var(--brown-dark);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.01em;
+}
+
+h1, h2, h3, h4, h5, .navbar-brand {
+    font-family: 'Playfair Display', serif;
+    color: var(--brown-dark);
+    font-weight: 700;
+}
+
+/* Navbar */
+.navbar-aesthetic {
+    background-color: var(--lavender-main);
+    box-shadow: 0 4px 20px rgba(74, 59, 50, 0.08);
+    padding: 0.9rem 0;
+}
+
+.navbar-aesthetic .navbar-brand,
+.navbar-aesthetic .nav-link {
+    color: #FFFFFF !important;
+}
+
+.navbar-aesthetic .nav-link:hover {
+    color: var(--lavender-soft) !important;
+}
+
+/* Cards & Surfaces */
+.card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--beige-border) !important;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(92, 77, 66, 0.05) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(92, 77, 66, 0.09) !important;
+}
+
+/* Custom Buttons */
+.btn {
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 0.55rem 1.25rem;
+    transition: all 0.2s ease;
+}
+
+.btn-lavender {
+    background-color: var(--lavender-main);
+    border-color: var(--lavender-main);
+    color: #FFFFFF;
+}
+
+.btn-lavender:hover {
+    background-color: var(--lavender-hover);
+    border-color: var(--lavender-hover);
+    color: #FFFFFF;
+}
+
+.btn-taupe {
+    background-color: var(--brown-dark);
+    border-color: var(--brown-dark);
+    color: #FAF7F2;
+}
+
+.btn-taupe:hover {
+    background-color: #362A23;
+    color: #FFFFFF;
+}
+
+.btn-outline-taupe {
+    border: 1.5px solid var(--brown-dark);
+    color: var(--brown-dark);
+    background-color: transparent;
+}
+
+.btn-outline-taupe:hover {
+    background-color: var(--beige-soft);
+    color: var(--brown-dark);
+}
+
+.btn-sage {
+    background-color: var(--sage-open);
+    border-color: var(--sage-open);
+    color: #FFFFFF;
+}
+
+.btn-sage:hover {
+    background-color: #58796B;
+    color: #FFFFFF;
+}
+
+/* Badges & Status Indicators */
+.badge-open {
+    background-color: #E3EFE9;
+    color: #3D5E50;
+    border: 1px solid #B7D4C6;
+    font-weight: 600;
+    padding: 0.4em 0.75em;
+    border-radius: 8px;
+}
+
+.badge-booked {
+    background-color: #F9E5E6;
+    color: #8C4347;
+    border: 1px solid #E8B8BB;
+    font-weight: 600;
+    padding: 0.4em 0.75em;
+    border-radius: 8px;
+}
+
+/* Form Inputs */
+.form-control, .form-select {
+    background-color: #FCFBF9;
+    border: 1px solid var(--beige-border);
+    border-radius: 10px;
+    color: var(--brown-dark);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--lavender-main);
+    box-shadow: 0 0 0 0.2rem rgba(142, 125, 190, 0.2);
+}
+
+/* FullCalendar Aesthetic Overrides */
+.fc {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.fc .fc-toolbar-title {
+    font-family: 'Playfair Display', serif;
+    color: var(--brown-dark);
+    font-size: 1.6rem;
+}
+
+.fc .fc-button-primary {
+    background-color: var(--lavender-main) !important;
+    border-color: var(--lavender-main) !important;
+    border-radius: 10px !important;
+    text-transform: capitalize;
+}
+
+.fc .fc-button-primary:hover {
+    background-color: var(--lavender-hover) !important;
+}
+
+.fc-theme-standard td, .fc-theme-standard th {
+    border-color: var(--beige-border) !important;
+}
+
+.fc .fc-col-header-cell {
+    background-color: var(--beige-soft);
+    padding: 8px 0;
+}
+
+.fc .fc-daygrid-day:hover {
+    background-color: var(--lavender-soft);
+    cursor: pointer;
+}
+
+.fc-day-today {
+    background-color: rgba(142, 125, 190, 0.08) !important;
+}
+
+/* Modals & Tables */
+.modal-content {
+    background-color: var(--bg-cream);
+    border: 1px solid var(--beige-border);
+    border-radius: 20px;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--beige-border);
+}
+
+.table {
+    color: var(--brown-dark);
+}
+
+.table thead {
+    background-color: var(--beige-soft);
+}

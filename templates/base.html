@@ -2,25 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Reservation System - Parent-Teacher Night</title>
-    <style>
-        body { font-family:Arial, Helvetica, sans-serif; }
-        .btn { display: inline-block; padding: 10px 20px; background; #e7dfc3; color: beige; text-decoration: none; border-radius: 5px;  }
-        .card { background: #dacaa4; padding: 15px; margin-top: 20px; border-radius: 5px; border: 1px solid #ddd; }
-    </style>
-    </head>
-    <body>
-        <h1>Parent-Teacher Reservation System</h1>
-        <p>Check reservation slots or book reservation slots</p>
-
-        <a href="/book" class="btn">Make reservation</a>
-
-        <div class="card">
-            <h3>Available slots</h3
-                {% if available %}
-                <ul>
-                    {% for spot in available %}
-                        
-                </ul>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent-Teacher Night Reservation System</title>
+    <link href="https://jsdelivr.net" rel="stylesheet">
+    <script src="https://jsdelivr.net"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-aesthetic mb-5">
+        <div class="container">
+            <a class="navbar-brand fs-4" href="{{ url_for('index') }}">Conference Portal</a>
+            <div class="navbar-nav ms-auto align-items-center gap-2">
+                <a class="nav-link" href="{{ url_for('shared_calendar') }}">Shared Calendar</a>
+                <a class="nav-link" href="{{ url_for('reserve') }}">Parent Slot List</a>
+                {% if session.get('teacher_id') %}
+                    <a class="nav-link fw-semibold" href="{{ url_for('teacher_dashboard') }}">My Dashboard ({{ session['teacher_name'] }})</a>
+                    <a class="btn btn-light btn-sm ms-2" style="color: #4A3B32;" href="{{ url_for('teacher_logout') }}">Logout</a>
+                {% else %}
+                    <a class="btn btn-light btn-sm ms-2" style="color: #4A3B32;" href="{{ url_for('teacher_auth') }}">Teacher Portal</a>
+                {% endif %}
+            </div>
         </div>
+    </nav>
 
+    <div class="container pb-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, msg in messages %}
+                <div class="alert alert-{{ category }} rounded-4">{{ msg }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://jsdelivr.net"></script>
+</body>
+</html>
