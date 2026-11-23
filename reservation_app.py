@@ -6,20 +6,27 @@ app = Flask(__name__)
 def home():
     return "<h1>Reservation System</h1>"
 
-# booking page
+# booking page - amelina
 @app.route("/booking")
 def booking():
     return """
     <h1>Reservation Booking</h1>
 
+    <p>Please enter your information and choose an available meeting time.</p>
+
+    <form action="/confirmation">
     <p>Parent/Guardian name:</p>
-    <input type="text">
+    <input type="text"
+    name="parent_name" required> 
     
     <p>Student Name:</p>
-    <input type="text">
+    <input type="text"
+    name="student_name" required>
 
     <p>Choose a Time:</p>
-    <select>
+    <select name="time" required>
+        <option value= "" disabled
+        selected>Select a time</option>
         <option>5:00 pm</option>
         <option>5:15 pm</option>
         <option>5:30 pm</option>
@@ -28,7 +35,8 @@ def booking():
     </select>
 
     <br><br>
-    <button>Reserve</button>
+    <button type="submit">Reserve</button>
+    </form>
     """
         
 # reservation confirmation page
