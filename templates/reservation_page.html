@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Reservation List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a class="brand" href="{{ url_for('index') }}">Conference Portal</a>
+            <div class="nav-links">
+                <a href="{{ url_for('shared_calendar') }}">Shared Calendar</a>
+                <a href="{{ url_for('reserve') }}">Parent Slot List</a>
+                {% if session.get('teacher_id') %}
+                    <a href="{{ url_for('teacher_dashboard') }}">My Dashboard ({{ session['teacher_name'] }})</a>
+                    <a class="nav-btn" href="{{ url_for('teacher_logout') }}">Logout</a>
+                {% else %}
+                    <a class="nav-btn" href="{{ url_for('teacher_auth') }}">Teacher Portal</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-bottom: 60px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+            <div>
+                <h2 style="margin-bottom: 4px;">Parent Reservation List</h2>
+                <p style="color: #7D6B5D; font-size: 0.9rem; margin: 0;">Filter by teacher to view available and reserved slots</p>
+            </div>
+            <form method="GET" style="min-width: 240px;">
+                <select name="teacher_id" onchange="this.form.submit()" style="margin-bottom: 0;">
+                    <option value="">All Teachers</option>
+                    {% for t in teachers %}
+                        <option value="{{ t.id }}" {% if selected_teacher == t.id %}selected{% endif %}>
+                            {{ t.name }} ({{ t.subject }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        <div class="grid-3">
+            {% for slot in slots %}
+            <div class="card">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <strong style="color: #7A68AE;">{{ slot.teacher.name }}</strong>
+                        <span class="{{ 'badge-booked' if slot.is_booked else 'badge-open' }}">
+                            {{ 'Taken' if slot.is_booked else 'Available' }}
+                        </span>
+                    </div>
+                    <p style="color: #7D6B5D; font-size: 0.85rem; margin-top: 0;">{{ slot.teacher.subject }}</p>
+                    <h4 style="margin-bottom: 16px;">{{ slot.date }} &bull; {{ slot.start_time }} – {{ slot.end_time }}</h4>
+                </div>
+
+                {% if not slot.is_booked %}
+                <form method="POST">
+                    <input type="hidden" name="slot_id" value="{{ slot.id }}">
+                    <input type="text" name="parent_name" placeholder="Parent Full Name" required>
+                    <input type="text" name="student_name" placeholder="Student Name" required>
+                    <button type="submit" class="btn btn-lightbrown">Confirm Reservation</button>
+                </form>
+                {% else %}
+                <p style="color: #7D6B5D; font-size: 0.85rem; border-top: 1px solid #E2D6C8; padding-top: 12px; margin-bottom: 0;">
+                    This time slot has already been reserved
+                </p>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="card" style="grid-column: 1 / -1; text-align: center;">
+                <p style="color: #7D6B5D; margin: 0;">No conference slots have been added yet</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

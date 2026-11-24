@@ -7,10 +7,8 @@ app.secret_key = 'change_this_to_a_random_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///reservations.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-SCHOOL_INVITE_CODE = "SCHOOL2026"  # Prevents parents/students from making teacher accounts
 db = SQLAlchemy(app)
 
-# --- DATABASE MODELS ---
 class Teacher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -22,9 +20,9 @@ class Teacher(db.Model):
 class TimeSlot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
-    date = db.Column(db.String(10), nullable=False)        # YYYY-MM-DD
-    start_time = db.Column(db.String(5), nullable=False)   # HH:MM
-    end_time = db.Column(db.String(5), nullable=False)     # HH:MM
+    date = db.Column(db.String(10), nullable=False)
+    start_time = db.Column(db.String(5), nullable=False)
+    end_time = db.Column(db.String(5), nullable=False)
     is_booked = db.Column(db.Boolean, default=False)
     parent_name = db.Column(db.String(100), nullable=True)
     student_name = db.Column(db.String(100), nullable=True)
@@ -32,7 +30,6 @@ class TimeSlot(db.Model):
 with app.app_context():
     db.create_all()
 
-# --- HOME & SHARED CALENDAR ---
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -43,7 +40,31 @@ def shared_calendar():
     is_teacher = 'teacher_id' in session
     return render_template('calendar.html', teachers=teachers, is_teacher=is_teacher)
 
-# --- TEACHER AUTHENTICATION (REGISTER & LOGIN) ---
+@app.route('/reserve', methods=['GET', 'POST'])
+def reserve():
+    if request.method == 'POST':
+        slot_id = request.form.get('slot_id')
+        slot = TimeSlot.query.get_or_404(slot_id)
+        if not slot.is_booked:
+            slot.is_booked = True
+            slot.parent_name = request.form.get('parent_name')
+            slot.student_name = request.form.get('student_name')
+            db.session.commit()
+            return redirect(url_for('confirmation', slot_id=slot.id))
+
+    teacher_filter = request.args.get('teacher_id', type=int)
+    teachers = Teacher.query.all()
+    query = TimeSlot.query
+    if teacher_filter:
+        query = query.filter_by(teacher_id=teacher_filter)
+    slots = query.order_by(TimeSlot.date, TimeSlot.start_time).all()
+    return render_template('reserve.html', slots=slots, teachers=teachers, selected_teacher=teacher_filter)
+
+@app.route('/confirmation/<int:slot_id>')
+def confirmation(slot_id):
+    slot = TimeSlot.query.get_or_404(slot_id)
+    return render_template('confirmation.html', slot=slot)
+
 @app.route('/teacher/auth', methods=['GET', 'POST'])
 def teacher_auth():
     if 'teacher_id' in session:
@@ -53,13 +74,13 @@ def teacher_auth():
         action = request.form.get('action')
 
         if action == 'register':
-            if request.form.get('invite_code') != SCHOOL_INVITE_CODE:
-                flash("Invalid School Invite Code.", "danger")
+            email = request.form.get('email').lower().strip()
+            if not (email.startswith('p') and email.endswith('@pdsb.net')):
+                flash("Only emails starting with 'p' and ending with '@pdsb.net' can register", "danger")
                 return redirect(url_for('teacher_auth'))
 
-            email = request.form.get('email').lower().strip()
             if Teacher.query.filter_by(email=email).first():
-                flash("An account with that email already exists.", "warning")
+                flash("An account with that email already exists", "warning")
                 return redirect(url_for('teacher_auth'))
 
             new_teacher = Teacher(
@@ -82,7 +103,7 @@ def teacher_auth():
                 session['teacher_name'] = teacher.name
                 return redirect(url_for('teacher_dashboard'))
             else:
-                flash("Incorrect email or password.", "danger")
+                flash("Incorrect email or password", "danger")
 
     return render_template('teacher_auth.html')
 
@@ -91,12 +112,10 @@ def teacher_logout():
     session.clear()
     return redirect(url_for('index'))
 
-# --- DEDICATED TEACHER VIEW (ADD SLOTS & ROSTER) ---
 @app.route('/teacher/dashboard')
 def teacher_dashboard():
     if 'teacher_id' not in session:
         return redirect(url_for('teacher_auth'))
-    
     teacher = Teacher.query.get_or_404(session['teacher_id'])
     slots = TimeSlot.query.filter_by(teacher_id=teacher.id).order_by(TimeSlot.date, TimeSlot.start_time).all()
     return render_template('teacher_dashboard.html', teacher=teacher, slots=slots)
@@ -136,33 +155,6 @@ def delete_slot(slot_id):
         db.session.commit()
     return redirect(request.referrer or url_for('teacher_dashboard'))
 
-# --- DEDICATED PARENT VIEW & BOOKING ---
-@app.route('/reserve', methods=['GET', 'POST'])
-def reserve():
-    if request.method == 'POST':
-        slot_id = request.form.get('slot_id')
-        slot = TimeSlot.query.get_or_404(slot_id)
-        if not slot.is_booked:
-            slot.is_booked = True
-            slot.parent_name = request.form.get('parent_name')
-            slot.student_name = request.form.get('student_name')
-            db.session.commit()
-            return redirect(url_for('confirmation', slot_id=slot.id))
-
-    teacher_filter = request.args.get('teacher_id', type=int)
-    teachers = Teacher.query.all()
-    query = TimeSlot.query
-    if teacher_filter:
-        query = query.filter_by(teacher_id=teacher_filter)
-    slots = query.order_by(TimeSlot.date, TimeSlot.start_time).all()
-    return render_template('reserve.html', slots=slots, teachers=teachers, selected_teacher=teacher_filter)
-
-@app.route('/confirmation/<int:slot_id>')
-def confirmation(slot_id):
-    slot = TimeSlot.query.get_or_404(slot_id)
-    return render_template('confirmation.html', slot=slot)
-
-# --- SHARED CALENDAR API ---
 @app.route('/api/slots')
 def api_slots():
     teacher_id = request.args.get('teacher_id', type=int)
@@ -175,7 +167,6 @@ def api_slots():
     events = []
 
     for s in slots:
-        # Privacy check: Only show parent/student names to the teacher who owns the slot
         is_owner = (logged_in_teacher == s.teacher_id)
         if s.is_booked:
             label = f"Booked ({s.student_name})" if is_owner else f"Taken - {s.teacher.name}"
@@ -187,7 +178,7 @@ def api_slots():
             'title': f"{s.start_time} {label}",
             'start': f"{s.date}T{s.start_time}:00",
             'end': f"{s.date}T{s.end_time}:00",
-            'color': '#dc3545' if s.is_booked else '#198754',
+            'color': '#C97A7E' if s.is_booked else '#A6896F',
             'extendedProps': {
                 'teacher_id': s.teacher_id,
                 'teacher_name': s.teacher.name,
@@ -203,5 +194,5 @@ def api_slots():
         })
     return jsonify(events)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation Confirmed</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a class="brand" href="{{ url_for('index') }}">Conference Portal</a>
+            <div class="nav-links">
+                <a href="{{ url_for('shared_calendar') }}">Shared Calendar</a>
+                <a href="{{ url_for('reserve') }}">Parent Slot List</a>
+                <a class="nav-btn" href="{{ url_for('teacher_auth') }}">Teacher Portal</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card" style="max-width: 520px; margin: 0 auto; text-align: center;">
+            <div>
+                <span class="pill">Confirmed</span>
+                <h2>Reservation Scheduled</h2>
+                <p style="color: #7D6B5D; font-size: 0.92rem; margin-bottom: 24px;">Your parent-teacher conference slot has been successfully reserved</p>
+
+                <div style="background: #FAF7F2; border: 1px solid #E2D6C8; border-radius: 14px; padding: 20px; text-align: left; margin-bottom: 24px;">
+                    <p style="margin: 0 0 8px 0;"><strong>Teacher:</strong> {{ slot.teacher.name }} ({{ slot.teacher.subject }})</p>
+                    <p style="margin: 0 0 8px 0;"><strong>Date:</strong> {{ slot.date }}</p>
+                    <p style="margin: 0 0 8px 0;"><strong>Time:</strong> {{ slot.start_time }} – {{ slot.end_time }}</p>
+                    <p style="margin: 0 0 8px 0;"><strong>Parent:</strong> {{ slot.parent_name }}</p>
+                    <p style="margin: 0;"><strong>Student:</strong> {{ slot.student_name }}</p>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+                <a href="{{ url_for('shared_calendar') }}" class="btn btn-lavender">View Calendar</a>
+                <a href="{{ url_for('index') }}" class="btn btn-outline">Return Home</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

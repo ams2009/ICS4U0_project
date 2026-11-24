@@ -1,47 +1,68 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="text-center py-4">
-    <h1 class="display-5 mb-3">Parent-Teacher Conference Hub</h1>
-    <p class="lead mx-auto mb-5" style="color: #7D6B5D; max-width: 600px;">
-        Where parents can view and book slots, and teachers can view and add slots
-    </p>
-
-    <div class="row g-4 justify-content-center">
-        <div class="col-md-4">
-            <div class="card h-100 p-4 text-start">
-                <div class="card-body d-flex flex-column justify-content-between p-0">
-                    <div>
-                        <h4>Shared Live Calendar</h4>
-                        <p class="small" style="color: #7D6B5D;">View available and reserved dates via calendar</p>
-                    </div>
-                    <a href="{{ url_for('shared_calendar') }}" class="btn btn-lavender w-100 mt-4">View Calendar</a>
-                </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent-Teacher Conference Hub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a class="brand" href="{{ url_for('index') }}">Conference Portal</a>
+            <div class="nav-links">
+                <a href="{{ url_for('shared_calendar') }}">Shared Calendar</a>
+                <a href="{{ url_for('reserve') }}">Parent Slot List</a>
+                {% if session.get('teacher_id') %}
+                    <a href="{{ url_for('teacher_dashboard') }}">My Dashboard ({{ session['teacher_name'] }})</a>
+                    <a class="nav-btn" href="{{ url_for('teacher_logout') }}">Logout</a>
+                {% else %}
+                    <a class="nav-btn" href="{{ url_for('teacher_auth') }}">Teacher Portal</a>
+                {% endif %}
             </div>
         </div>
+    </nav>
 
-        <div class="col-md-4">
-            <div class="card h-100 p-4 text-start">
-                <div class="card-body d-flex flex-column justify-content-between p-0">
-                    <div>
-                        <h4>Parent Booking View</h4>
-                        <p class="small" style="color: #7D6B5D;">Check slots and make reservations</p>
-                    </div>
-                    <a href="{{ url_for('reserve') }}" class="btn btn-sage w-100 mt-4">View & Book Slots</a>
-                </div>
-            </div>
+    <div class="container" style="padding-bottom: 60px;">
+        <div style="text-align: center; margin-bottom: 48px;">
+            <span class="pill">Parent-Teacher Night Reservations</span>
+            <h1 style="font-size: 2.5rem; margin-bottom: 12px;">Parent-Teacher Conference Hub</h1>
+            <p style="color: #7D6B5D; max-width: 580px; margin: 0 auto;">
+                View shared calendar, reserve a slot with a teacher, or manage slots
+            </p>
         </div>
 
-        <div class="col-md-4">
-            <div class="card h-100 p-4 text-start">
-                <div class="card-body d-flex flex-column justify-content-between p-0">
-                    <div>
-                        <h4>Teacher Portal</h4>
-                        <p class="small" style="color: #7D6B5D;">Sign in or create a teacher account to create/view slots</p>
-                    </div>
-                    <a href="{{ url_for('teacher_auth') }}" class="btn btn-outline-taupe w-100 mt-4">Teacher Login / Sign Up</a>
+        <div class="grid-3">
+            <div class="card">
+                <div>
+                    <h3>Shared Calendar</h3>
+                    <p style="color: #7D6B5D; font-size: 0.92rem; margin-bottom: 24px;">
+                        View dates and times
+                    </p>
                 </div>
+                <a href="{{ url_for('shared_calendar') }}" class="btn btn-lavender">Open Calendar</a>
+            </div>
+
+            <div class="card">
+                <div>
+                    <h3>Parent Booking View</h3>
+                    <p style="color: #7D6B5D; font-size: 0.92rem; margin-bottom: 24px;">
+                        Check and book slots
+                    </p>
+                </div>
+                <a href="{{ url_for('reserve') }}" class="btn btn-lightbrown">View & Book Slots</a>
+            </div>
+
+            <div class="card">
+                <div>
+                    <h3>Teacher Portal</h3>
+                    <p style="color: #7D6B5D; font-size: 0.92rem; margin-bottom: 24px;">
+                        Sign in or create a teacher account to create and view slots
+                    </p>
+                </div>
+                <a href="{{ url_for('teacher_auth') }}" class="btn btn-outline">Teacher Login / Sign Up</a>
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
+</body>
+</html>

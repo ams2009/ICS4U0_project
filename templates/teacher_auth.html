@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Login & Registration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a class="brand" href="{{ url_for('index') }}">Conference Portal</a>
+            <div class="nav-links">
+                <a href="{{ url_for('shared_calendar') }}">Shared Calendar</a>
+                <a href="{{ url_for('reserve') }}">Parent Slot List</a>
+                <a class="nav-btn" href="{{ url_for('teacher_auth') }}">Teacher Portal</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-bottom: 60px;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, msg in messages %}
+                <div class="alert">{{ msg }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <div class="grid-2">
+            <div class="card">
+                <div>
+                    <h3>Teacher Login</h3>
+                    <p style="color: #7D6B5D; font-size: 0.9rem; margin-bottom: 20px;">Sign in to add slots and view reserved slots</p>
+                    <form method="POST">
+                        <input type="hidden" name="action" value="login">
+                        <label>Teacher Email</label>
+                        <input type="email" name="email" placeholder="p0123456@pdsb.net" required>
+                        <label>Password</label>
+                        <input type="password" name="password" required>
+                        <button type="submit" class="btn btn-lavender">Sign In</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div>
+                    <h3>Create Teacher Account</h3>
+                    <p style="color: #7D6B5D; font-size: 0.9rem; margin-bottom: 20px;">Must start with 'p' and end with @pdsb.net.</p>
+                    <form method="POST">
+                        <input type="hidden" name="action" value="register">
+                        <label>Full Name (e.g., Mr. Reed)</label>
+                        <input type="text" name="name" required>
+                        <label>Subject / Grade</label>
+                        <input type="text" name="subject" placeholder="Grade 12 / Functions" required>
+                        <label>Teacher Board Email</label>
+                        <input type="email" name="email" placeholder="p0123456@pdsb.net" required>
+                        <label>Create Password</label>
+                        <input type="password" name="password" required>
+                        <button type="submit" class="btn btn-taupe">Create Account</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,262 +1,148 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
-    <div>
-        <h2 class="mb-1">Schedule Calendar</h2>
-        <p class="small mb-0" style="color: #7D6B5D;">Click to view times and book a slot</p>
-    </div>
-    <div>
-        <select id="teacherFilter" class="form-select">
-            <option value="">All Teachers</option>
-            {% for t in teachers %}
-                <option value="{{ t.id }}">{{ t.name }} ({{ t.subject }})</option>
-            {% endfor %}
-        </select>
-    </div>
-</div>
-
-<div class="card p-4 bg-white">
-    <div id="calendar"></div>
-</div>
-
-<!-- Shared Date Modal -->
-<div class="modal fade" id="sharedModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Schedule for <span id="modalDate"></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Conference Calendar</title>
+    <script src="https://jsdelivr.net"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a class="brand" href="{{ url_for('index') }}">Conference Portal</a>
+            <div class="nav-links">
+                <a href="{{ url_for('shared_calendar') }}">Shared Calendar</a>
+                <a href="{{ url_for('reserve') }}">Parent Slot List</a>
+                {% if session.get('teacher_id') %}
+                    <a href="{{ url_for('teacher_dashboard') }}">My Dashboard ({{ session['teacher_name'] }})</a>
+                    <a class="nav-btn" href="{{ url_for('teacher_logout') }}">Logout</a>
+                {% else %}
+                    <a class="nav-btn" href="{{ url_for('teacher_auth') }}">Teacher Portal</a>
+                {% endif %}
             </div>
-            <div class="modal-body">
-                <div id="modalSlotList"></div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-bottom: 60px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+            <div>
+                <h2 style="margin-bottom: 4px;">Parent-Teacher Conference Calendar</h2>
+                <p style="color: #7D6B5D; font-size: 0.9rem; margin: 0;">Click any date below to view or book a slot</p>
+            </div>
+            <div style="min-width: 240px;">
+                <select id="teacherFilter" style="margin-bottom: 0;">
+                    <option value="">All Teachers</option>
+                    {% for t in teachers %}
+                        <option value="{{ t.id }}">{{ t.name }} ({{ t.subject }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <div id="calendar" data-reserve-url="{{ url_for('reserve') }}"></div>
+            </div>
+
+            <div class="card" id="dayPanel">
+                <div>
+                    <h3 id="panelTitle">Select a Date on the Calendar</h3>
+                    <p id="panelSubtitle" style="color: #7D6B5D; font-size: 0.9rem;">Click any day on the left to see available and reserved slots</p>
+                    <div id="slotList" style="margin-top: 20px;"></div>
+                </div>
 
                 {% if is_teacher %}
-                <hr class="my-4" style="border-color: #E2D6C8;">
-                <h6 class="mb-3">Add Your Availability for This Date</h6>
-                <form method="POST" action="{{ url_for('save_slot') }}" class="row g-2 align-items-end">
-                    <input type="hidden" name="date" id="teacherAddDate">
-                    <div class="col-md-4">
-                        <label class="form-label small">Start Time</label>
-                        <input type="time" name="start_time" class="form-control" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label small">End Time</label>
-                        <input type="time" name="end_time" class="form-control" required>
-                    </div>
-                    <div class="col-md-4">
-                        <button type="submit" class="btn btn-taupe w-100">Add Slot</button>
-                    </div>
-                </form>
+                <div style="border-top: 1px solid #E2D6C8; padding-top: 20px; margin-top: 20px;">
+                    <h4>Add Slot for Selected Date</h4>
+                    <form method="POST" action="{{ url_for('save_slot') }}">
+                        <label>Date</label>
+                        <input type="date" name="date" id="teacherDateInput" required>
+                        <label>Start Time</label>
+                        <input type="time" name="start_time" required>
+                        <label>End Time</label>
+                        <input type="time" name="end_time" required>
+                        <button type="submit" class="btn btn-taupe">Add Slot</button>
+                    </form>
+                </div>
                 {% endif %}
             </div>
         </div>
     </div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    let currentEvents = [];
-    const modal = new bootstrap.Modal(document.getElementById('sharedModal'));
-    const filterSelect = document.getElementById('teacherFilter');
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let currentEvents = [];
+        const calendarEl = document.getElementById('calendar');
+        const reserveUrl = calendarEl.dataset.reserveUrl;
+        const filterSelect = document.getElementById('teacherFilter');
 
-    const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-        initialView: 'dayGridMonth',
-        events: async function(info, successCallback) {
-            const tid = filterSelect.value;
-            const url = tid ? `/api/slots?teacher_id=${tid}` : '/api/slots';
-            const res = await fetch(url);
-            currentEvents = await res.json();
-            successCallback(currentEvents);
-        },
-        dateClick: (info) => openModal(info.dateStr),
-        eventClick: (info) => openModal(info.event.extendedProps.date)
-    });
-    calendar.render();
+        if (typeof FullCalendar === 'undefined') {
+            calendarEl.innerHTML = '<p style="color:#8C4347;">Calendar script blocked by network. Use the <a href="' + reserveUrl + '">Parent Slot List</a> or <a href="/teacher/dashboard">Teacher Dashboard</a> to view/book dates</p>';
+            return;
+        }
 
-    filterSelect.addEventListener('change', () => calendar.refetchEvents());
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            events: async function(info, successCallback) {
+                const tid = filterSelect.value;
+                const url = tid ? `/api/slots?teacher_id=${tid}` : '/api/slots';
+                const res = await fetch(url);
+                currentEvents = await res.json();
+                successCallback(currentEvents);
+            },
+            dateClick: (info) => showDay(info.dateStr),
+            eventClick: (info) => showDay(info.event.extendedProps.date)
+        });
+        calendar.render();
 
-    function openModal(dateStr) {
-        document.getElementById('modalDate').innerText = dateStr;
-        const addDateInput = document.getElementById('teacherAddDate');
-        if (addDateInput) addDateInput.value = dateStr;
+        filterSelect.addEventListener('change', () => calendar.refetchEvents());
 
-        const container = document.getElementById('modalSlotList');
-        container.innerHTML = '';
-        const daySlots = currentEvents.filter(e => e.extendedProps.date === dateStr);
+        function showDay(dateStr) {
+            document.getElementById('panelTitle').innerText = 'Schedule for ' + dateStr;
+            document.getElementById('panelSubtitle').innerText = '';
+            const dateInput = document.getElementById('teacherDateInput');
+            if (dateInput) dateInput.value = dateStr;
 
-        if (daySlots.length === 0) {
-            container.innerHTML = '<p class="small" style="color: #7D6B5D;">No slots available on this day</p>';
-        } else {
-            daySlots.forEach(ev => {
+            const list = document.getElementById('slotList');
+            list.innerHTML = '';
+            const matches = currentEvents.filter(e => e.extendedProps.date === dateStr);
+
+            if (matches.length === 0) {
+                list.innerHTML = '<p style="color:#7D6B5D;">No slots added/avaialble</p>';
+                return;
+            }
+
+            matches.forEach(ev => {
                 const p = ev.extendedProps;
                 if (p.is_booked) {
-                    const details = p.is_owner 
-                        ? `<strong>Booked by:</strong> ${p.parent_name} (Student: ${p.student_name})`
-                        : `Slot Taken`;
-                    container.innerHTML += `
-                        <div class="p-3 mb-2 rounded-3" style="background-color: #F9E5E6; border: 1px solid #E8B8BB; color: #8C4347;">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span><strong>${p.start_time} – ${p.end_time}</strong> &bull; ${p.teacher_name} (${p.subject})</span>
-                                <span class="badge badge-booked">Booked</span>
+                    const who = p.is_owner ? `Booked by ${p.parent_name} (Student: ${p.student_name})` : 'Slot Taken';
+                    list.innerHTML += `
+                        <div style="background:#F9E5E6; border:1px solid #E8B8BB; padding:14px; border-radius:12px; margin-bottom:12px;">
+                            <div style="display:flex; justify-content:space-between;">
+                                <strong>${p.start_time} – ${p.end_time} • ${p.teacher_name}</strong>
+                                <span class="badge-booked">Booked</span>
                             </div>
-                            <div class="small mt-1">${details}</div>
+                            <div style="font-size:0.85rem; margin-top:6px; color:#8C4347;">${who}</div>
                         </div>`;
                 } else {
-                    container.innerHTML += `
-                        <div class="p-3 mb-2 rounded-3" style="background-color: #FFFFFF; border: 1px solid #E2D6C8;">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span><strong>${p.start_time} – ${p.end_time}</strong> &bull; ${p.teacher_name} (${p.subject})</span>
-                                <span class="badge badge-open">Available</span>
+                    list.innerHTML += `
+                        <div style="background:#FAF7F2; border:1px solid #E2D6C8; padding:14px; border-radius:12px; margin-bottom:12px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                <strong>${p.start_time} – ${p.end_time} • ${p.teacher_name}</strong>
+                                <span class="badge-open">Available</span>
                             </div>
-                            <form method="POST" action="{{ url_for('reserve') }}" class="row g-2">
+                            <form method="POST" action="${reserveUrl}">
                                 <input type="hidden" name="slot_id" value="${ev.id}">
-                                <div class="col-md-4">
-                                    <input type="text" name="parent_name" class="form-control form-control-sm" placeholder="Parent/Guardian Name" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <input type="text" name="student_name" class="form-control form-control-sm" placeholder="Student Name" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <button type="submit" class="btn btn-sage btn-sm w-100">Book Slot</button>
-                                </div>
+                                <input type="text" name="parent_name" placeholder="Parent Full Name" required>
+                                <input type="text" name="student_name" placeholder="Student Name" required>
+                                <button type="submit" class="btn btn-lightbrown btn-sm">Confirm Booking</button>
                             </form>
                         </div>`;
                 }
             });
         }
-        modal.show();
-    }
-});
-</script>
-{% endblock %}
-{% extends "base.html" %}
-{% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
-    <div>
-        <h2 class="mb-1">Shared Conference Calendar</h2>
-        <p class="small mb-0" style="color: #7D6B5D;">Click any date to view timings, book an open slot, or add availability.</p>
-    </div>
-    <div>
-        <select id="teacherFilter" class="form-select">
-            <option value="">All Teachers</option>
-            {% for t in teachers %}
-                <option value="{{ t.id }}">{{ t.name }} ({{ t.subject }})</option>
-            {% endfor %}
-        </select>
-    </div>
-</div>
-
-<div class="card p-4 bg-white">
-    <div id="calendar"></div>
-</div>
-
-<!-- Shared Date Modal -->
-<div class="modal fade" id="sharedModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Schedule for <span id="modalDate"></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div id="modalSlotList"></div>
-
-                {% if is_teacher %}
-                <hr class="my-4" style="border-color: #E2D6C8;">
-                <h6 class="mb-3">Add Your Availability for This Date</h6>
-                <form method="POST" action="{{ url_for('save_slot') }}" class="row g-2 align-items-end">
-                    <input type="hidden" name="date" id="teacherAddDate">
-                    <div class="col-md-4">
-                        <label class="form-label small">Start Time</label>
-                        <input type="time" name="start_time" class="form-control" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label small">End Time</label>
-                        <input type="time" name="end_time" class="form-control" required>
-                    </div>
-                    <div class="col-md-4">
-                        <button type="submit" class="btn btn-taupe w-100">Add Slot</button>
-                    </div>
-                </form>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    let currentEvents = [];
-    const modal = new bootstrap.Modal(document.getElementById('sharedModal'));
-    const filterSelect = document.getElementById('teacherFilter');
-
-    const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-        initialView: 'dayGridMonth',
-        events: async function(info, successCallback) {
-            const tid = filterSelect.value;
-            const url = tid ? `/api/slots?teacher_id=${tid}` : '/api/slots';
-            const res = await fetch(url);
-            currentEvents = await res.json();
-            successCallback(currentEvents);
-        },
-        dateClick: (info) => openModal(info.dateStr),
-        eventClick: (info) => openModal(info.event.extendedProps.date)
     });
-    calendar.render();
-
-    filterSelect.addEventListener('change', () => calendar.refetchEvents());
-
-    function openModal(dateStr) {
-        document.getElementById('modalDate').innerText = dateStr;
-        const addDateInput = document.getElementById('teacherAddDate');
-        if (addDateInput) addDateInput.value = dateStr;
-
-        const container = document.getElementById('modalSlotList');
-        container.innerHTML = '';
-        const daySlots = currentEvents.filter(e => e.extendedProps.date === dateStr);
-
-        if (daySlots.length === 0) {
-            container.innerHTML = '<p class="small" style="color: #7D6B5D;">No slots posted for this date.</p>';
-        } else {
-            daySlots.forEach(ev => {
-                const p = ev.extendedProps;
-                if (p.is_booked) {
-                    const details = p.is_owner 
-                        ? `<strong>Booked by:</strong> ${p.parent_name} (Student: ${p.student_name})`
-                        : `Slot Taken`;
-                    container.innerHTML += `
-                        <div class="p-3 mb-2 rounded-3" style="background-color: #F9E5E6; border: 1px solid #E8B8BB; color: #8C4347;">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span><strong>${p.start_time} – ${p.end_time}</strong> &bull; ${p.teacher_name} (${p.subject})</span>
-                                <span class="badge badge-booked">Booked</span>
-                            </div>
-                            <div class="small mt-1">${details}</div>
-                        </div>`;
-                } else {
-                    container.innerHTML += `
-                        <div class="p-3 mb-2 rounded-3" style="background-color: #FFFFFF; border: 1px solid #E2D6C8;">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span><strong>${p.start_time} – ${p.end_time}</strong> &bull; ${p.teacher_name} (${p.subject})</span>
-                                <span class="badge badge-open">Available</span>
-                            </div>
-                            <form method="POST" action="{{ url_for('reserve') }}" class="row g-2">
-                                <input type="hidden" name="slot_id" value="${ev.id}">
-                                <div class="col-md-4">
-                                    <input type="text" name="parent_name" class="form-control form-control-sm" placeholder="Parent Full Name" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <input type="text" name="student_name" class="form-control form-control-sm" placeholder="Student Name" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <button type="submit" class="btn btn-sage btn-sm w-100">Book Slot</button>
-                                </div>
-                            </form>
-                        </div>`;
-                }
-            });
-        }
-        modal.show();
-    }
-});
-</script>
-{% endblock %}
+    </script>
+</body>
+</html>
