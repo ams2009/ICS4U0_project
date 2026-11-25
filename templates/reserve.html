@@ -52,8 +52,7 @@
                         </span>
                     </div>
                     <p style="color: #7D6B5D; font-size: 0.85rem; margin-top: 0;">{{ slot.teacher.subject }}</p>
-                    <h4 style="margin-bottom: 16px;">{{ slot.date }} &bull; {{ slot.start_time }} – {{ slot.end_time }}</h4>
-                </div>
+<h4 style="margin-bottom: 16px;">{{ slot.date | format_date }} &bull; {{ slot.start_time | format_time }} – {{ slot.end_time | format_time }}</h4>                </div>
 
                 {% if not slot.is_booked %}
                 <form method="POST">

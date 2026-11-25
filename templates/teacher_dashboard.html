@@ -57,8 +57,9 @@
                         <tbody>
                             {% for slot in slots %}
                             <tr>
-                                <td>{{ slot.date }}</td>
-                                <td>{{ slot.start_time }} – {{ slot.end_time }}</td>
+                                <td>{{ slot.date | format_date }}</td>
+                                <td>{{ slot.start_time | format_time }} – {{ slot.end_time | format_time }}</td>
+
                                 <td>
                                     <span class="{{ 'badge-booked' if slot.is_booked else 'badge-open' }}">
                                         {{ 'Booked' if slot.is_booked else 'Open' }}

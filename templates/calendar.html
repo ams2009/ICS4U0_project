@@ -4,8 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shared Conference Calendar</title>
-    <script src="https://jsdelivr.net"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=25">
+    <style>
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
+        .cal-day-name { font-weight: 700; font-size: 0.8rem; color: #7D6B5D; padding: 6px 0; }
+        .cal-cell {
+            background: #FAF7F2; border: 1px solid #E2D6C8; border-radius: 12px;
+            min-height: 70px; padding: 8px 4px; color: #4A3B32;
+            display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+        }
+        .cal-cell:hover { background: #F1EDFA; border-color: #8E7DBE; }
+        .cal-cell.selected { background: #8E7DBE; color: #FFFFFF !important; border-color: #7A68AE; }
+        .cal-cell.empty { background: transparent; border: none; }
+        .cal-dot-open { background: #A6896F; color: #FFFFFF; font-size: 0.7rem; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+        .cal-dot-booked { background: #C97A7E; color: #FFFFFF; font-size: 0.7rem; padding: 2px 7px; border-radius: 99px; font-weight: 600; }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -16,7 +30,7 @@
                 <a href="{{ url_for('reserve') }}">Parent Slot List</a>
                 {% if session.get('teacher_id') %}
                     <a href="{{ url_for('teacher_dashboard') }}">My Dashboard ({{ session['teacher_name'] }})</a>
-                    <a class="nav-btn" href="{{ url_for('teacher_logout') }}">Logout</a>
+                    <a class="nav-btn" href="{{ url_for('teacher_logout') }}">Log Out</a>
                 {% else %}
                     <a class="nav-btn" href="{{ url_for('teacher_auth') }}">Teacher Portal</a>
                 {% endif %}
@@ -27,122 +41,119 @@
     <div class="container" style="padding-bottom: 60px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
             <div>
-                <h2 style="margin-bottom: 4px;">Parent-Teacher Conference Calendar</h2>
-                <p style="color: #7D6B5D; font-size: 0.9rem; margin: 0;">Click any date below to view or book a slot</p>
+                <h2 style="margin-bottom: 4px;">Shared Conference Calendar</h2>
+                <p style="color: #7D6B5D; font-size: 0.9rem; margin: 0;">Click any date to view timings and/or book a slot</p>
             </div>
-            <div style="min-width: 240px;">
-                <select id="teacherFilter" style="margin-bottom: 0;">
+            <form method="GET" action="{{ url_for('shared_calendar') }}" style="min-width: 240px;">
+                <input type="hidden" name="year" value="{{ year }}">
+                <input type="hidden" name="month" value="{{ month }}">
+                {% if selected_date %}
+                    <input type="hidden" name="date" value="{{ selected_date }}">
+                {% endif %}
+                <select name="teacher_id" onchange="this.form.submit()" style="margin-bottom: 0;">
                     <option value="">All Teachers</option>
                     {% for t in teachers %}
-                        <option value="{{ t.id }}">{{ t.name }} ({{ t.subject }})</option>
+                        <option value="{{ t.id }}" {% if selected_teacher == t.id %}selected{% endif %}>
+                            {{ t.name }} ({{ t.subject }})
+                        </option>
                     {% endfor %}
                 </select>
-            </div>
+            </form>
         </div>
 
         <div class="grid-2">
+            <!-- Monthly Grid -->
             <div class="card">
-                <div id="calendar" data-reserve-url="{{ url_for('reserve') }}"></div>
+                <div>
+                    <div class="cal-header">
+                        <a class="btn btn-outline btn-sm" href="{{ url_for('shared_calendar', year=prev_year, month=prev_month, teacher_id=selected_teacher) }}">&larr; Prev</a>
+                        <h3 style="margin: 0;">{{ month_name }}</h3>
+                        <a class="btn btn-outline btn-sm" href="{{ url_for('shared_calendar', year=next_year, month=next_month, teacher_id=selected_teacher) }}">Next &rarr;</a>
+                    </div>
+
+                    <div class="cal-grid">
+                        <div class="cal-day-name">Sun</div>
+                        <div class="cal-day-name">Mon</div>
+                        <div class="cal-day-name">Tue</div>
+                        <div class="cal-day-name">Wed</div>
+                        <div class="cal-day-name">Thu</div>
+                        <div class="cal-day-name">Fri</div>
+                        <div class="cal-day-name">Sat</div>
+
+                        {% for week in month_matrix %}
+                            {% for day in week %}
+                                {% if day == 0 %}
+                                    <div class="cal-cell empty"></div>
+                                {% else %}
+                                    {% set date_str = '%04d-%02d-%02d' % (year, month, day) %}
+                                    <a href="{{ url_for('shared_calendar', year=year, month=month, date=date_str, teacher_id=selected_teacher) }}"
+                                       class="cal-cell {% if selected_date == date_str %}selected{% endif %}">
+                                        <strong>{{ day }}</strong>
+                                        {% if date_str in slot_counts %}
+                                            {% if slot_counts[date_str]['open'] > 0 %}
+                                                <span class="cal-dot-open">{{ slot_counts[date_str]['open'] }} Open</span>
+                                            {% else %}
+                                                <span class="cal-dot-booked">Full</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
 
-            <div class="card" id="dayPanel">
+            <!-- Selected Date Schedule -->
+            <div class="card">
                 <div>
-                    <h3 id="panelTitle">Select a Date on the Calendar</h3>
-                    <p id="panelSubtitle" style="color: #7D6B5D; font-size: 0.9rem;">Click any day on the left to see available and reserved slots</p>
-                    <div id="slotList" style="margin-top: 20px;"></div>
+                    {% if selected_date %}
+                        <h3>Schedule for {{ selected_date | format_date }}</h3>
+                        {% for slot in day_slots %}
+                            {% if slot.is_booked %}
+                                <div style="background:#F9E5E6; border:1px solid #E8B8BB; padding:14px; border-radius:12px; margin-bottom:12px;">
+                                    <div style="display:flex; justify-content:space-between;">
+                                        <strong>{{ slot.start_time | format_time }} – {{ slot.end_time | format_time }} | {{ slot.teacher.name }}</strong>
+                                        <span class="badge-booked">Booked</span>
+                                    </div>
+                                    <div style="font-size:0.85rem; margin-top:6px; color:#8C4347;">
+                                        {% if logged_in_teacher == slot.teacher_id %}
+                                            Booked by {{ slot.parent_name }} (Student: {{ slot.student_name }} - {{ slot.course }})
+                                        {% else %}
+                                            Slot Taken
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div style="background:#FAF7F2; border:1px solid #E2D6C8; padding:14px; border-radius:12px; margin-bottom:12px;">
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                        <strong>{{ slot.start_time | format_time }} – {{ slot.end_time | format_time }} | {{ slot.teacher.name }}</strong>
+                                        <span class="badge-open">Available</span>
+                                    </div>
+                                    <form method="POST" action="{{ url_for('reserve') }}">
+                                        <input type="hidden" name="slot_id" value="{{ slot.id }}">
+                                        <select name="course" required>
+                                            <option value="" disabled selected>Select Class (Grade / Subject)</option>
+                                            {% for c in slot.teacher.subject.split(',') %}
+                                                <option value="{{ c.strip() }}">{{ c.strip() }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <input type="text" name="parent_name" placeholder="Parent Full Name" required>
+                                        <input type="text" name="student_name" placeholder="Student Name" required>
+                                        <button type="submit" class="btn btn-lightbrown btn-sm">Confirm Booking</button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <p style="color:#7D6B5D;">No slots scheduled for {{ selected_date | format_date }} yet. Come back soon!</p>
+                        {% endfor %}
+                    {% else %}
+                        <h3>Select a Date on the Calendar</h3>
+                        <p style="color:#7D6B5D; font-size:0.9rem;">Click any day on the left to view open and booked slots</p>
+                    {% endif %}
                 </div>
 
                 {% if is_teacher %}
                 <div style="border-top: 1px solid #E2D6C8; padding-top: 20px; margin-top: 20px;">
-                    <h4>Add Slot for Selected Date</h4>
-                    <form method="POST" action="{{ url_for('save_slot') }}">
-                        <label>Date</label>
-                        <input type="date" name="date" id="teacherDateInput" required>
-                        <label>Start Time</label>
-                        <input type="time" name="start_time" required>
-                        <label>End Time</label>
-                        <input type="time" name="end_time" required>
-                        <button type="submit" class="btn btn-taupe">Add Slot</button>
-                    </form>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+                    <h4>Add Slot {% if selected_date %}for {{ selected_date | format_date }}{% endif %}</h4>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let currentEvents = [];
-        const calendarEl = document.getElementById('calendar');
-        const reserveUrl = calendarEl.dataset.reserveUrl;
-        const filterSelect = document.getElementById('teacherFilter');
-
-        if (typeof FullCalendar === 'undefined') {
-            calendarEl.innerHTML = '<p style="color:#8C4347;">Calendar script blocked by network. Use the <a href="' + reserveUrl + '">Parent Slot List</a> or <a href="/teacher/dashboard">Teacher Dashboard</a> to view/book dates</p>';
-            return;
-        }
-
-        const calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            events: async function(info, successCallback) {
-                const tid = filterSelect.value;
-                const url = tid ? `/api/slots?teacher_id=${tid}` : '/api/slots';
-                const res = await fetch(url);
-                currentEvents = await res.json();
-                successCallback(currentEvents);
-            },
-            dateClick: (info) => showDay(info.dateStr),
-            eventClick: (info) => showDay(info.event.extendedProps.date)
-        });
-        calendar.render();
-
-        filterSelect.addEventListener('change', () => calendar.refetchEvents());
-
-        function showDay(dateStr) {
-            document.getElementById('panelTitle').innerText = 'Schedule for ' + dateStr;
-            document.getElementById('panelSubtitle').innerText = '';
-            const dateInput = document.getElementById('teacherDateInput');
-            if (dateInput) dateInput.value = dateStr;
-
-            const list = document.getElementById('slotList');
-            list.innerHTML = '';
-            const matches = currentEvents.filter(e => e.extendedProps.date === dateStr);
-
-            if (matches.length === 0) {
-                list.innerHTML = '<p style="color:#7D6B5D;">No slots added/avaialble</p>';
-                return;
-            }
-
-            matches.forEach(ev => {
-                const p = ev.extendedProps;
-                if (p.is_booked) {
-                    const who = p.is_owner ? `Booked by ${p.parent_name} (Student: ${p.student_name})` : 'Slot Taken';
-                    list.innerHTML += `
-                        <div style="background:#F9E5E6; border:1px solid #E8B8BB; padding:14px; border-radius:12px; margin-bottom:12px;">
-                            <div style="display:flex; justify-content:space-between;">
-                                <strong>${p.start_time} – ${p.end_time} • ${p.teacher_name}</strong>
-                                <span class="badge-booked">Booked</span>
-                            </div>
-                            <div style="font-size:0.85rem; margin-top:6px; color:#8C4347;">${who}</div>
-                        </div>`;
-                } else {
-                    list.innerHTML += `
-                        <div style="background:#FAF7F2; border:1px solid #E2D6C8; padding:14px; border-radius:12px; margin-bottom:12px;">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                                <strong>${p.start_time} – ${p.end_time} • ${p.teacher_name}</strong>
-                                <span class="badge-open">Available</span>
-                            </div>
-                            <form method="POST" action="${reserveUrl}">
-                                <input type="hidden" name="slot_id" value="${ev.id}">
-                                <input type="text" name="parent_name" placeholder="Parent Full Name" required>
-                                <input type="text" name="student_name" placeholder="Student Name" required>
-                                <button type="submit" class="btn btn-lightbrown btn-sm">Confirm Booking</button>
-                            </form>
-                        </div>`;
-                }
-            });
-        }
-    });
-    </script>
-</body>
-</html>

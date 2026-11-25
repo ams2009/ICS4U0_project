@@ -27,8 +27,8 @@
 
                 <div style="background: #FAF7F2; border: 1px solid #E2D6C8; border-radius: 14px; padding: 20px; text-align: left; margin-bottom: 24px;">
                     <p style="margin: 0 0 8px 0;"><strong>Teacher:</strong> {{ slot.teacher.name }} ({{ slot.teacher.subject }})</p>
-                    <p style="margin: 0 0 8px 0;"><strong>Date:</strong> {{ slot.date }}</p>
-                    <p style="margin: 0 0 8px 0;"><strong>Time:</strong> {{ slot.start_time }} – {{ slot.end_time }}</p>
+                    <p style="margin: 0 0 8px 0;"><strong>Date:</strong> {{ slot.date | format_date }}</p>
+                    <p style="margin: 0 0 8px 0;"><strong>Time:</strong> {{ slot.start_time | format_time }} – {{ slot.end_time | format_time }}</p>
                     <p style="margin: 0 0 8px 0;"><strong>Parent:</strong> {{ slot.parent_name }}</p>
                     <p style="margin: 0;"><strong>Student:</strong> {{ slot.student_name }}</p>
                 </div>

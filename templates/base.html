@@ -17,7 +17,7 @@
                 <a class="nav-link" href="{{ url_for('reserve') }}">Parent Slot List</a>
                 {% if session.get('teacher_id') %}
                     <a class="nav-link fw-semibold" href="{{ url_for('teacher_dashboard') }}">My Dashboard ({{ session['teacher_name'] }})</a>
-                    <a class="btn btn-light btn-sm" style="color: #4A3B32;" href="{{ url_for('teacher_logout') }}">Logout</a>
+                    <a class="btn btn-light btn-sm" style="color: #4A3B32;" href="{{ url_for('teacher_logout') }}">Log Out</a>
                 {% else %}
                     <a class="btn btn-light btn-sm" style="color: #4A3B32;" href="{{ url_for('teacher_auth') }}">Teacher Portal</a>
                 {% endif %}
