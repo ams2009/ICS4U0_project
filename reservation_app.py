@@ -27,32 +27,60 @@ def booking():
         <style>
             body {
                 font-family: Arial, sans-serif;
-                background-color: #f4f4f4;
+                background-color: #27355c;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                height: 100vh;
+                min-height: 100vh;
                 margin: 0;
             }
 
             .booking-box {
                 background-color: white;
-                padding: 30px;
-                border-radius: 10px;
-                width: 350px;
+                padding: 35px;
+                border-radius: 14px;
+                width: 380px;
                 text-align: center;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+                box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
             }
 
-            input, select {
-                width: 90%;
-                padding: 10px;
+            h1 {
                 margin-bottom: 10px;
             }
 
+            .description {
+                margin-bottom: 25px;
+            }
+
+            label {
+                display: block;
+                text-align: left;
+                margin-bottom: 6px;
+                font-weight: bold;
+            }
+
+            input, select {
+                width: 100%;
+                padding: 11px;
+                margin-bottom: 18px;
+                border: 1px solid #ccc;
+                border-radius: 7px;
+                box-sizing: border-box;
+                font-size: 14px;
+            }
+
             button {
-                padding: 10px 20px;
+                width: 100%;
+                padding: 12px;
+                border: none;
+                border-radius: 7px;
+                font-size: 16px;
                 cursor: pointer;
+            }
+
+            .note {
+                font-size: 13px;
+                margin-top: 15px;
             }
         </style>
     </head>
@@ -63,28 +91,32 @@ def booking():
 
             <h1>Reservation Booking</h1>
 
-            <p>Please enter your information and choose an available meeting time.</p>
+            <p class="description">
+                Enter your information and choose an available meeting time.
+            </p>
 
             <form action="/confirmation">
 
-                <p>Parent/Guardian Name:</p>
+                <label>Parent/Guardian Name</label>
                 <input type="text" name="parent_name" required>
 
-                <p>Student Name:</p>
+                <label>Student Name</label>
                 <input type="text" name="student_name" required>
 
-                <p>Choose a Time:</p>
+                <label>Choose a Time</label>
 
                 <select name="time" required>
                     <option value="" disabled selected>Select a time</option>
                     """ + time_options + """
                 </select>
 
-                <br><br>
-
-                <button type="submit">Reserve</button>
+                <button type="submit">Reserve Appointment</button>
 
             </form>
+
+            <p class="note">
+                Only available meeting times are shown.
+            </p>
 
         </div>
 
