@@ -153,7 +153,24 @@
                     {% endif %}
                 </div>
 
-                {% if is_teacher %}
+                                {% if is_teacher %}
                 <div style="border-top: 1px solid #E2D6C8; padding-top: 20px; margin-top: 20px;">
                     <h4>Add Slot {% if selected_date %}for {{ selected_date | format_date }}{% endif %}</h4>
+                    <form method="POST" action="{{ url_for('save_slot') }}">
+                        <label>Date</label>
+                        <input type="date" name="date" value="{{ selected_date }}" required>
+                        <label>Start Time</label>
+                        <input type="time" name="start_time" required>
+                        <label>End Time</label>
+                        <input type="time" name="end_time" required>
+                        <button type="submit" class="btn btn-taupe">Publish Slot</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
 
