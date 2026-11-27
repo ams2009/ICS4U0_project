@@ -1,4 +1,3 @@
-# by amelina
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,18 +27,8 @@
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
             <div>
                 <h2 style="margin-bottom: 4px;">Parent Reservation List</h2>
-                <p style="color: #7D6B5D; font-size: 0.9rem; margin: 0;">Filter by teacher to view available and reserved slots</p>
+                <p style="color: #7D6B5D; font-size: 0.9rem; margin: 0;">View available and reserved Meet the Teacher time slots</p>
             </div>
-            <form method="GET" style="min-width: 240px;">
-                <select name="teacher_id" onchange="this.form.submit()" style="margin-bottom: 0;">
-                    <option value="">All Teachers</option>
-                    {% for t in teachers %}
-                        <option value="{{ t.id }}" {% if selected_teacher == t.id %}selected{% endif %}>
-                            {{ t.name }} ({{ t.subject }})
-                        </option>
-                    {% endfor %}
-                </select>
-            </form>
         </div>
 
         <div class="grid-3">
@@ -56,17 +45,45 @@
 <h4 style="margin-bottom: 16px;">{{ slot.date | format_date }} &bull; {{ slot.start_time | format_time }} – {{ slot.end_time | format_time }}</h4>                </div>
 
                 {% if not slot.is_booked %}
-                <form method="POST">
-                    <input type="hidden" name="slot_id" value="{{ slot.id }}">
-                    <input type="text" name="parent_name" placeholder="Parent Full Name" required>
-                    <input type="text" name="student_name" placeholder="Student Name" required>
-                    <button type="submit" class="btn btn-lightbrown">Confirm Reservation</button>
-                </form>
-                {% else %}
-                <p style="color: #7D6B5D; font-size: 0.85rem; border-top: 1px solid #E2D6C8; padding-top: 12px; margin-bottom: 0;">
-                    This time slot has already been reserved
-                </p>
-                {% endif %}
+
+<div class="booking-box">
+
+    <div class="booking-header">
+        <h3>Reservation Booking</h3>
+        <p>Meet the Teacher Night</p>
+    </div>
+
+    <p class="description">
+        Enter your information to reserve this available meeting time.
+    </p>
+
+    <form method="POST">
+        <input type="hidden" name="slot_id" value="{{ slot.id }}">
+
+        <label>Parent/Guardian Name</label>
+        <input type="text" name="parent_name" required>
+
+        <label>Student Name</label>
+        <input type="text" name="student_name" required>
+
+        <button type="submit" class="reserve-button">
+            Reserve Appointment
+        </button>
+    </form>
+
+    <p class="note">
+        Only available meeting times can be reserved.
+    </p>
+
+</div>
+
+{% else %}
+
+<p style="color: #7D6B5D; font-size: 0.85rem; border-top: 1px solid #E2D6C8; padding-top: 12px; margin-bottom: 0;">
+    This time slot has already been reserved
+</p>
+
+{% endif %}
             </div>
             {% else %}
             <div class="card" style="grid-column: 1 / -1; text-align: center;">

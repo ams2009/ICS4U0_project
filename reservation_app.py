@@ -27,7 +27,7 @@ def booking():
         <style>
             body {
                 font-family: Arial, sans-serif;
-                background-color: #27355c;
+                background-color: #1f2a47;
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -37,15 +37,27 @@ def booking():
 
             .booking-box {
                 background-color: white;
-                padding: 35px;
+                padding: 40px;
                 border-radius: 14px;
-                width: 380px;
+                width: 420px;
                 text-align: center;
                 box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+                overflow: hidden;
             }
 
-            h1 {
-                margin-bottom: 10px;
+            .header {
+                background-color: #3b528a;
+                color: white;
+                margin: -40px -40px 30px -40px;
+                padding: 24px 30px;
+            }
+
+            .header h1 {
+                margin: 0;
+            }
+
+            .header p {
+                margin: 8px 0 0;
             }
 
             .description {
@@ -72,6 +84,8 @@ def booking():
             button {
                 width: 100%;
                 padding: 12px;
+                background-color: #27355c;
+                color: white;
                 border: none;
                 border-radius: 7px;
                 font-size: 16px;
@@ -89,7 +103,10 @@ def booking():
 
         <div class="booking-box">
 
-            <h1>Reservation Booking</h1>
+            <div class="header">
+                <h1>Reservation Booking</h1>
+                <p>Meet the Teacher Night</p>
+            </div>
 
             <p class="description">
                 Enter your information and choose an available meeting time.
@@ -123,7 +140,7 @@ def booking():
     </body>
     </html>
     """
-        
+
 # reservation confirmation page
 @app.route("/confirmation")
 def confirmation():
@@ -131,4 +148,3 @@ def confirmation():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
