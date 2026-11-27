@@ -6,9 +6,11 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = 'change_this_to_a_random_secret_key'
+app.secret_key = 'change_this_to_a_random_secret_key_idk'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///reservations.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+ALLOWED_TEACHER_EMAIL = "p0196030@pdsb.net" # Mr. Reed's email so it's only reserved for him to be able to sign up/use
+
 
 db = SQLAlchemy(app)
 
@@ -36,7 +38,7 @@ def format_time(time_str):
     except Exception:
         return time_str
 
-
+# defining class for the teacher, what they can do/need for sign up, etc.
 class Teacher(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
@@ -46,6 +48,7 @@ class Teacher(db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     slots = db.relationship('TimeSlot', backref='teacher', lazy=True)
 
+# defining class for the time slots, the dates, timings, parent/teacher/student names, availability etc.
 class TimeSlot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
@@ -148,28 +151,41 @@ def confirmation(slot_id):
     slot = TimeSlot.query.get_or_404(slot_id)
     return render_template('confirmation.html', slot=slot)
 
-# route for teacher authentification (teacher-only sign up and login within PDSB)
+# route for teacher authentification (can only be done for Mr. Reed)
+# sign-up system stops once Mr. Reed makes account (since it's designed for him, a specific teacher)
 @app.route('/teacher/auth', methods=['GET', 'POST'])
 def teacher_auth():
     if 'teacher_id' in session:
         return redirect(url_for('teacher_dashboard'))
 
+    teacher_exists = (Teacher.query.count() > 0)
+
     if request.method == 'POST':
         action = request.form.get('action')
 
         if action == 'register':
-            email = request.form.get('email').lower().strip()
-            if not (email.startswith('p') and email.endswith('@pdsb.net')):
-                flash("Only emails starting with 'p' and ending with '@pdsb.net' can register", "danger")
+            if teacher_exists:
+                flash("Registration is closed,  teacher account is already active for this portal !", "danger")
                 return redirect(url_for('teacher_auth'))
 
-            if Teacher.query.filter_by(email=email).first():
-                flash("An account with that email already exists", "warning")
+            email = request.form.get('email', '').lower().strip()
+            if email != ALLOWED_TEACHER_EMAIL.lower().strip():
+                flash("Unauthorized email (only the assigned teacher can create this account !)", "danger")
                 return redirect(url_for('teacher_auth'))
+
+            grades = request.form.getlist('grade[]')
+            subjects = request.form.getlist('subject[]')
+            codes = request.form.getlist('code[]')
+
+            combined_classes = ", ".join(
+                f"{g} / {s.strip()} ({c.strip().upper()})"
+                for g, s, c in zip(grades, subjects, codes)
+                if s.strip()
+            )
 
             new_teacher = Teacher(
-                name=request.form.get('name'),
-                subject=request.form.get('subject'),
+                name=request.form.get('name').strip(),
+                subject=combined_classes,
                 email=email,
                 password_hash=generate_password_hash(request.form.get('password'))
             )
@@ -180,16 +196,52 @@ def teacher_auth():
             return redirect(url_for('teacher_dashboard'))
 
         elif action == 'login':
-            email = request.form.get('email').lower().strip()
+            email = request.form.get('email', '').lower().strip()
             teacher = Teacher.query.filter_by(email=email).first()
             if teacher and check_password_hash(teacher.password_hash, request.form.get('password')):
                 session['teacher_id'] = teacher.id
                 session['teacher_name'] = teacher.name
                 return redirect(url_for('teacher_dashboard'))
-            else:
-                flash("Incorrect email or password", "danger")
+            flash("Incorrect email or password.", "danger")
 
-    return render_template('teacher_auth.html')
+    return render_template('teacher_auth.html', teacher_exists=teacher_exists)
+
+# by amelina
+booked_times = []
+
+@app.route("/booking")
+def booking():
+    times = ["5:00 pm", "5:15 pm", "5:30 pm", "5:45 pm", "6:00 pm"]
+    time_options = ""
+    for time in times:
+        if time not in booked_times:
+            time_options += "<option>" + time + "</option>"
+
+    return """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Reservation Booking</title>
+        <link rel="stylesheet" href="/static/style.css?v=40">
+        <style>
+            .booking-wrapper { display: flex; justify-content: center; align-items: center; padding: 20px 24px 60px 24px; }
+        </style>
+    </head>
+    <body>
+        <main class="booking-wrapper">
+            <section>
+                <h1>Reservation Booking</h1>
+                <label for="booking-time">Available time:</label>
+                <select id="booking-time" name="time">
+    """ + time_options + """
+                </select>
+            </section>
+        </main>
+    </body>
+    </html>
+    """
 
 # route for log out button for teachers
 @app.route('/teacher/logout')
