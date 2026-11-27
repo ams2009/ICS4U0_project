@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.secret_key = 'change_this_to_a_random_secret_key_idk'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///reservations.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-ALLOWED_TEACHER_EMAIL = "p0196030@pdsb.net" # Mr. Reed's email so it's only reserved for him to be able to sign up/use
+ALLOWED_TEACHER_EMAILS = ["p0196030@pdsb.net", "p0080748@pdsb.net"] # Mr. Reed's email so it's only reserved for Mr. Reed + Mr. Kowalczewski to be able to sign up/use
 
 
 db = SQLAlchemy(app)
@@ -151,26 +151,33 @@ def confirmation(slot_id):
     slot = TimeSlot.query.get_or_404(slot_id)
     return render_template('confirmation.html', slot=slot)
 
-# route for teacher authentification (can only be done for Mr. Reed)
-# sign-up system stops once Mr. Reed makes account (since it's designed for him, a specific teacher)
+# route for teacher authentification (can only be done for Mr. Reed and Mr. Kowalczewski)
+# sign-up system stops once Mr. Reed and Mr. Kowalczewski make accounts
 @app.route('/teacher/auth', methods=['GET', 'POST'])
 def teacher_auth():
     if 'teacher_id' in session:
         return redirect(url_for('teacher_dashboard'))
 
-    teacher_exists = (Teacher.query.count() > 0)
+    # Only closes registration once both authorized teachers have registered
+    teacher_exists = (Teacher.query.count() >= len(ALLOWED_TEACHER_EMAILS))
 
     if request.method == 'POST':
         action = request.form.get('action')
 
         if action == 'register':
             if teacher_exists:
-                flash("Registration is closed,  teacher account is already active for this portal !", "danger")
+                flash("Registration is closed, all authorized teacher accounts are already active", "danger")
                 return redirect(url_for('teacher_auth'))
 
             email = request.form.get('email', '').lower().strip()
-            if email != ALLOWED_TEACHER_EMAIL.lower().strip():
-                flash("Unauthorized email (only the assigned teacher can create this account !)", "danger")
+            allowed_list = [e.lower().strip() for e in ALLOWED_TEACHER_EMAILS]
+
+            if email not in allowed_list:
+                flash("Unauthorized email! Only assigned teachers can create accounts", "danger")
+                return redirect(url_for('teacher_auth'))
+
+            if Teacher.query.filter_by(email=email).first():
+                flash("An account with that email already exists, please sign in on the left !", "warning")
                 return redirect(url_for('teacher_auth'))
 
             grades = request.form.getlist('grade[]')
