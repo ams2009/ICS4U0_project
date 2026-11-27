@@ -6,64 +6,262 @@
     <title>Parent-Teacher Conference Hub</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
 </head>
+
 <body>
+
     <nav class="navbar">
         <div class="container">
-            <a class="brand" href="{{ url_for('index') }}">Conference Portal</a>
+
+            <a class="brand" href="{{ url_for('index') }}">
+                Conference Portal
+            </a>
+
             <div class="nav-links">
-                <a href="{{ url_for('shared_calendar') }}">Shared Calendar</a>
-                <a href="{{ url_for('reserve') }}">Parent Slot List</a>
+
+                <a href="{{ url_for('shared_calendar') }}">
+                    Shared Calendar
+                </a>
+
+                <a href="{{ url_for('reserve') }}">
+                    Parent Slot List
+                </a>
+
+                <a href="#instructions">
+                    User Documentation
+                </a>
+
                 {% if session.get('teacher_id') %}
-                    <a href="{{ url_for('teacher_dashboard') }}">My Dashboard ({{ session['teacher_name'] }})</a>
-                    <a class="nav-btn" href="{{ url_for('teacher_logout') }}">Logout</a>
+
+                    <a href="{{ url_for('teacher_dashboard') }}">
+                        My Dashboard ({{ session['teacher_name'] }})
+                    </a>
+
+                    <a class="nav-btn" href="{{ url_for('teacher_logout') }}">
+                        Logout
+                    </a>
+
                 {% else %}
-                    <a class="nav-btn" href="{{ url_for('teacher_auth') }}">Teacher Portal</a>
+
+                    <a class="nav-btn" href="{{ url_for('teacher_auth') }}">
+                        Teacher Portal
+                    </a>
+
                 {% endif %}
+
             </div>
         </div>
     </nav>
 
+
     <div class="container" style="padding-bottom: 60px;">
+
+        <!-- Main Homepage Section -->
         <div style="text-align: center; margin-bottom: 48px;">
-            <span class="pill">Parent-Teacher Night Reservations</span>
-            <h1 style="font-size: 2.5rem; margin-bottom: 12px;">Parent-Teacher Conference Hub</h1>
+
+            <span class="pill">
+                Parent-Teacher Night Reservations
+            </span>
+
+            <h1 style="font-size: 2.5rem; margin-bottom: 12px;">
+                Parent-Teacher Conference Hub
+            </h1>
+
             <p style="color: #7D6B5D; max-width: 580px; margin: 0 auto;">
-                View shared calendar, reserve a slot with a teacher, or manage slots
-                  ~ Made by Aamna + Amelina :]
+                View the shared calendar, reserve a meeting time, or manage teacher appointments.
+                <br>
+                Made by Aamna + Amelina :]
             </p>
+
         </div>
 
+
+        <!-- Main Options -->
         <div class="grid-3">
+
+            <!-- Shared Calendar -->
             <div class="card">
                 <div>
-                    <h3>Shared Calendar</h3>
+
+                    <h3>
+                        Shared Calendar
+                    </h3>
+
                     <p style="color: #7D6B5D; font-size: 0.92rem; margin-bottom: 24px;">
-                        View dates and times
+                        View available and booked Meet the Teacher dates and times.
                     </p>
+
                 </div>
-                <a href="{{ url_for('shared_calendar') }}" class="btn btn-lavender">Open Calendar</a>
+
+                <a
+                    href="{{ url_for('shared_calendar') }}"
+                    class="btn btn-lavender"
+                >
+                    Open Calendar
+                </a>
+
             </div>
 
+
+            <!-- Parent Booking -->
             <div class="card">
                 <div>
-                    <h3>Parent Booking View</h3>
+
+                    <h3>
+                        Parent Booking View
+                    </h3>
+
                     <p style="color: #7D6B5D; font-size: 0.92rem; margin-bottom: 24px;">
-                        Check and book slots
+                        View available meeting times and reserve an appointment.
                     </p>
+
                 </div>
-                <a href="{{ url_for('reserve') }}" class="btn btn-lightbrown">View & Book Slots</a>
+
+                <a
+                    href="{{ url_for('reserve') }}"
+                    class="btn btn-lightbrown"
+                >
+                    View & Book Slots
+                </a>
+
             </div>
 
+
+            <!-- Teacher Portal -->
             <div class="card">
                 <div>
-                    <h3>Teacher Portal</h3>
+
+                    <h3>
+                        Teacher Portal
+                    </h3>
+
                     <p style="color: #7D6B5D; font-size: 0.92rem; margin-bottom: 24px;">
-                        Sign in or create a teacher account to create and view slots
+                        Sign in to create meeting times and view booked appointments.
                     </p>
+
                 </div>
-                <a href="{{ url_for('teacher_auth') }}" class="btn btn-outline">Teacher Login / Sign Up</a>
+
+                <a
+                    href="{{ url_for('teacher_auth') }}"
+                    class="btn btn-outline"
+                >
+                    Teacher Login
+                </a>
+
             </div>
+
         </div>
+
+
+        <!-- User Documentation -->
+        <div
+            id="instructions"
+            class="card"
+            style="margin-top: 48px;"
+        >
+
+            <h2 style="margin-bottom: 28px;">
+                Reservation System User Documentation
+            </h2>
+
+
+            <!-- Parent Instructions -->
+            <div style="margin-bottom: 36px;">
+
+                <h3>
+                    Parent/Guardian Instructions
+                </h3>
+
+                <ol style="line-height: 1.9; color: #4A3B32;">
+
+                    <li>
+                        Open the Parent Slot List or Shared Calendar.
+                    </li>
+
+                    <li>
+                        View the available meeting times.
+                    </li>
+
+                    <li>
+                        Select an available time slot.
+                    </li>
+
+                    <li>
+                        Enter the parent or guardian name.
+                    </li>
+
+                    <li>
+                        Enter the student name.
+                    </li>
+
+                    <li>
+                        Click the <strong>Reserve Appointment</strong> button.
+                    </li>
+
+                    <li>
+                        A confirmation page will appear after the reservation is submitted.
+                    </li>
+
+                </ol>
+
+                <p style="color: #7D6B5D;">
+                    If a time has already been booked, it will be shown as taken and cannot be reserved again.
+                </p>
+
+            </div>
+
+
+            <!-- Teacher Instructions -->
+            <div>
+
+                <h3>
+                    Teacher Instructions
+                </h3>
+
+                <ol style="line-height: 1.9; color: #4A3B32;">
+
+                    <li>
+                        Open the Teacher Portal.
+                    </li>
+
+                    <li>
+                        Sign in using the teacher email and password.
+                    </li>
+
+                    <li>
+                        Open the teacher dashboard.
+                    </li>
+
+                    <li>
+                        Add available meeting slots by entering the date, start time, and end time.
+                    </li>
+
+                    <li>
+                        View the scheduled and booked meeting slots.
+                    </li>
+
+                    <li>
+                        Check whether each time slot is open or booked.
+                    </li>
+
+                    <li>
+                        For booked appointments, view the parent or guardian name and student name.
+                    </li>
+
+                    <li>
+                        Remove a time slot if necessary.
+                    </li>
+
+                    <li>
+                        Log out when finished.
+                    </li>
+
+                </ol>
+
+            </div>
+
+        </div>
+
     </div>
+
 </body>
 </html>
