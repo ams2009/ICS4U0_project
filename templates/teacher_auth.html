@@ -10,6 +10,7 @@
     <nav class="navbar">
         <div class="container">
             <a class="brand" href="{{ url_for('index') }}">Conference Hub</a>
+
             <div class="nav-links">
                 <a href="{{ url_for('shared_calendar') }}">Shared Calendar</a>
                 <a href="{{ url_for('reserve') }}">Parent Slot List</a>
@@ -19,6 +20,7 @@
     </nav>
 
     <div class="container" style="padding-bottom: 60px;">
+
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% for category, msg in messages %}
                 <div class="alert">{{ msg }}</div>
@@ -26,87 +28,170 @@
         {% endwith %}
 
         <div class="grid-2">
+
             <!-- Teacher Login -->
             <div class="card">
                 <div>
+
                     <h3>Teacher Login</h3>
+
                     <p style="color: #7D6B5D; font-size: 0.9rem; margin-bottom: 20px;">
-                        Sign in to manage your conference schedule and view booked slots
+                        Sign in to manage your conference schedule and view booked slots.
                     </p>
+
                     <form method="POST">
+
                         <input type="hidden" name="action" value="login">
+
                         <label>Teacher Email</label>
-                        <input type="email" name="email" placeholder="p012345@pdsb.net" required>
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="p012345@pdsb.net"
+                            required
+                        >
+
                         <label>Password</label>
-                        <input type="password" name="password" required>
-                        <button type="submit" class="btn btn-lavender">Sign In</button>
+                        <input
+                            type="password"
+                            name="password"
+                            required
+                        >
+
+                        <button type="submit" class="btn btn-lavender">
+                            Sign In
+                        </button>
+
                     </form>
+
                 </div>
             </div>
+
 
             <!-- Account Creator for Teacher -->
             <div class="card">
                 <div>
+
                     <h3>Create Teacher Account</h3>
+
                     <p style="color: #7D6B5D; font-size: 0.9rem; margin-bottom: 20px;">
-                        Must be valid PDSB Email
+                        Must be a valid PDSB email.
                     </p>
+
                     <form method="POST">
+
                         <input type="hidden" name="action" value="register">
-                        
-                        <label>Teacher Full Name (eg. Mr. Kowalczewski)</label>
-                        <input type="text" name="name" required>
+
+                        <label>Teacher Full Name</label>
+                        <input
+                            type="text"
+                            name="name"
+                            required
+                        >
 
                         <label>Classes Taught (Grade / Subject / Course Code)</label>
+
                         <div id="classContainer">
+
                             <div style="display: flex; gap: 6px; margin-bottom: 8px;">
-                                <select name="grade[]" style="width: 30%; margin-bottom: 0;" required>
+
+                                <select
+                                    name="grade[]"
+                                    style="width: 30%; margin-bottom: 0;"
+                                    required
+                                >
                                     <option value="Grade 9">Grade 9</option>
                                     <option value="Grade 10">Grade 10</option>
                                     <option value="Grade 11">Grade 11</option>
                                     <option value="Grade 12">Grade 12</option>
                                 </select>
-                                <input type="text" name="subject[]" placeholder="Subject (eg. Computer Science)" style="width: 42%; margin-bottom: 0;" required>
-                                <input type="text" name="code[]" placeholder="Course Code (eg. ICS4U0)" style="width: 28%; margin-bottom: 0;" required>
+
+                                <input
+                                    type="text"
+                                    name="subject[]"
+                                    placeholder="Subject (eg. Computer Science)"
+                                    style="width: 42%; margin-bottom: 0;"
+                                    required
+                                >
+
+                                <input
+                                    type="text"
+                                    name="code[]"
+                                    placeholder="Course Code (eg. ICS4U0)"
+                                    style="width: 28%; margin-bottom: 0;"
+                                    required
+                                >
+
                             </div>
+
                         </div>
-                        <button type="button" id="addClassBtn" class="btn btn-outline btn-scm" style="margin-bottom: 16px;">+ Add Another Class</button>
+
+                        <button
+                            type="button"
+                            id="addClassBtn"
+                            class="btn btn-outline btn-sm"
+                            style="margin-bottom: 16px;"
+                        >
+                            + Add Another Class
+                        </button>
 
                         <label>Teacher Email</label>
-                        <input type="email" name="email" placeholder="p012345@pdsb.net" required>
+                        <input
+                            type="email"
+                            name="email"
+                            placeholder="p012345@pdsb.net"
+                            required
+                        >
 
                         <label>Create Password</label>
-                        <input type="password" name="password" required>
+                        <input
+                            type="password"
+                            name="password"
+                            required
+                        >
 
-                        <button type="submit" class="btn btn-taupe">Create Account</button>
+                        <button type="submit" class="btn btn-taupe">
+                            Create Account
+                        </button>
+
                     </form>
+
                 </div>
             </div>
+
         </div>
+
     </div>
 
     <script>
-    document.getElementById('addClassBtn').addEventListener('click', function() {
-        var row = document.createElement('div');
-        row.style.cssText = 'display: flex; gap: 6px; margin-bottom: 8px; align-items: center;';
-        row.innerHTML =
-            '<select name="grade[]" style="width: 28%; margin-bottom: 0;" required>' +
-                '<option value="Grade 9">Grade 9</option>' +
-                '<option value="Grade 10">Grade 10</option>' +
-                '<option value="Grade 11">Grade 11</option>' +
-                '<option value="Grade 12">Grade 12</option>' +
-            '</select>' +
-            '<input type="text" name="subject[]" placeholder="Subject (eg. Biology)" style="width: 38%; margin-bottom: 0;" required>' +
-            '<input type="text" name="code[]" placeholder="Code (eg. SBI4U)" style="width: 24%; margin-bottom: 0;" required>' +
-            '<button type="button" class="btn btn-outline btn-sm remove-row" style="width: 10%; padding: 8px 0; text-align: center;">&times;</button>';
-        
-        row.querySelector('.remove-row').addEventListener('click', function() {
-            row.remove();
-        });
+        document.getElementById('addClassBtn').addEventListener('click', function() {
 
-        document.getElementById('classContainer').appendChild(row);
-    });
+            var row = document.createElement('div');
+
+            row.style.cssText =
+                'display: flex; gap: 6px; margin-bottom: 8px; align-items: center;';
+
+            row.innerHTML =
+                '<select name="grade[]" style="width: 28%; margin-bottom: 0;" required>' +
+                    '<option value="Grade 9">Grade 9</option>' +
+                    '<option value="Grade 10">Grade 10</option>' +
+                    '<option value="Grade 11">Grade 11</option>' +
+                    '<option value="Grade 12">Grade 12</option>' +
+                '</select>' +
+
+                '<input type="text" name="subject[]" placeholder="Subject (eg. Biology)" style="width: 38%; margin-bottom: 0;" required>' +
+
+                '<input type="text" name="code[]" placeholder="Code (eg. SBI4U)" style="width: 24%; margin-bottom: 0;" required>' +
+
+                '<button type="button" class="btn btn-outline btn-sm remove-row" style="width: 10%; padding: 8px 0; text-align: center;">&times;</button>';
+
+            row.querySelector('.remove-row').addEventListener('click', function() {
+                row.remove();
+            });
+
+            document.getElementById('classContainer').appendChild(row);
+        });
     </script>
+
 </body>
 </html>
-
