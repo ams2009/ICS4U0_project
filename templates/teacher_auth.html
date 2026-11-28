@@ -6,18 +6,35 @@
     <title>Teacher Login & Registration</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=9">
 </head>
+
 <body>
+
     <nav class="navbar">
         <div class="container">
-            <a class="brand" href="{{ url_for('index') }}">Conference Hub</a>
+
+            <a class="brand" href="{{ url_for('index') }}">
+                Conference Hub
+            </a>
 
             <div class="nav-links">
-                <a href="{{ url_for('shared_calendar') }}">Shared Calendar</a>
-                <a href="{{ url_for('reserve') }}">Parent Slot List</a>
-                <a class="nav-btn" href="{{ url_for('teacher_auth') }}">Teacher's Hub</a>
+
+                <a href="{{ url_for('shared_calendar') }}">
+                    Shared Calendar
+                </a>
+
+                <a href="{{ url_for('reserve') }}">
+                    Parent Slot List
+                </a>
+
+                <a class="nav-btn" href="{{ url_for('teacher_auth') }}">
+                    Teacher's Hub
+                </a>
+
             </div>
+
         </div>
     </nav>
+
 
     <div class="container" style="padding-bottom: 60px;">
 
@@ -27,13 +44,18 @@
             {% endfor %}
         {% endwith %}
 
+
         <div class="grid-2">
+
 
             <!-- Teacher Login -->
             <div class="card">
+
                 <div>
 
-                    <h3>Teacher Login</h3>
+                    <h3>
+                        Teacher Login
+                    </h3>
 
                     <p style="color: #7D6B5D; font-size: 0.9rem; margin-bottom: 20px;">
                         Sign in to manage your conference schedule and view booked slots.
@@ -41,38 +63,55 @@
 
                     <form method="POST">
 
-                        <input type="hidden" name="action" value="login">
+                        <input
+                            type="hidden"
+                            name="action"
+                            value="login"
+                        >
 
-                        <label>Teacher Email</label>
+                        <label>
+                            Teacher Email
+                        </label>
+
                         <input
                             type="email"
                             name="email"
-                            placeholder="p012345@pdsb.net"
+                            placeholder="p0196030@pdsb.net"
                             required
                         >
 
-                        <label>Password</label>
+                        <label>
+                            Password
+                        </label>
+
                         <input
                             type="password"
                             name="password"
                             required
                         >
 
-                        <button type="submit" class="btn btn-lavender">
+                        <button
+                            type="submit"
+                            class="btn btn-lavender"
+                        >
                             Sign In
                         </button>
 
                     </form>
 
                 </div>
+
             </div>
 
 
-            <!-- Account Creator for Teacher -->
+            <!-- Create Teacher Account -->
             <div class="card">
+
                 <div>
 
-                    <h3>Create Teacher Account</h3>
+                    <h3>
+                        Create Teacher Account
+                    </h3>
 
                     <p style="color: #7D6B5D; font-size: 0.9rem; margin-bottom: 20px;">
                         Must be a valid PDSB email.
@@ -80,16 +119,28 @@
 
                     <form method="POST">
 
-                        <input type="hidden" name="action" value="register">
+                        <input
+                            type="hidden"
+                            name="action"
+                            value="register"
+                        >
 
-                        <label>Teacher Full Name</label>
+
+                        <label>
+                            Teacher Full Name
+                        </label>
+
                         <input
                             type="text"
                             name="name"
                             required
                         >
 
-                        <label>Classes Taught (Grade / Subject / Course Code)</label>
+
+                        <label>
+                            Classes Taught (Grade / Subject / Course Code)
+                        </label>
+
 
                         <div id="classContainer">
 
@@ -100,11 +151,23 @@
                                     style="width: 30%; margin-bottom: 0;"
                                     required
                                 >
-                                    <option value="Grade 9">Grade 9</option>
-                                    <option value="Grade 10">Grade 10</option>
-                                    <option value="Grade 11">Grade 11</option>
-                                    <option value="Grade 12">Grade 12</option>
+                                    <option value="Grade 9">
+                                        Grade 9
+                                    </option>
+
+                                    <option value="Grade 10">
+                                        Grade 10
+                                    </option>
+
+                                    <option value="Grade 11">
+                                        Grade 11
+                                    </option>
+
+                                    <option value="Grade 12">
+                                        Grade 12
+                                    </option>
                                 </select>
+
 
                                 <input
                                     type="text"
@@ -113,6 +176,7 @@
                                     style="width: 42%; margin-bottom: 0;"
                                     required
                                 >
+
 
                                 <input
                                     type="text"
@@ -126,6 +190,7 @@
 
                         </div>
 
+
                         <button
                             type="button"
                             id="addClassBtn"
@@ -135,35 +200,50 @@
                             + Add Another Class
                         </button>
 
-                        <label>Teacher Email</label>
+
+                        <label>
+                            Teacher Email
+                        </label>
+
                         <input
                             type="email"
                             name="email"
-                            placeholder="p012345@pdsb.net"
+                            placeholder="p0196030@pdsb.net"
                             required
                         >
 
-                        <label>Create Password</label>
+
+                        <label>
+                            Create Password
+                        </label>
+
                         <input
                             type="password"
                             name="password"
                             required
                         >
 
-                        <button type="submit" class="btn btn-taupe">
+
+                        <button
+                            type="submit"
+                            class="btn btn-taupe"
+                        >
                             Create Account
                         </button>
 
                     </form>
 
                 </div>
+
             </div>
 
         </div>
 
     </div>
 
+
     <script>
+
         document.getElementById('addClassBtn').addEventListener('click', function() {
 
             var row = document.createElement('div');
@@ -172,11 +252,14 @@
                 'display: flex; gap: 6px; margin-bottom: 8px; align-items: center;';
 
             row.innerHTML =
+
                 '<select name="grade[]" style="width: 28%; margin-bottom: 0;" required>' +
+
                     '<option value="Grade 9">Grade 9</option>' +
                     '<option value="Grade 10">Grade 10</option>' +
                     '<option value="Grade 11">Grade 11</option>' +
                     '<option value="Grade 12">Grade 12</option>' +
+
                 '</select>' +
 
                 '<input type="text" name="subject[]" placeholder="Subject (eg. Biology)" style="width: 38%; margin-bottom: 0;" required>' +
@@ -185,12 +268,18 @@
 
                 '<button type="button" class="btn btn-outline btn-sm remove-row" style="width: 10%; padding: 8px 0; text-align: center;">&times;</button>';
 
+
             row.querySelector('.remove-row').addEventListener('click', function() {
+
                 row.remove();
+
             });
 
+
             document.getElementById('classContainer').appendChild(row);
+
         });
+
     </script>
 
 </body>
